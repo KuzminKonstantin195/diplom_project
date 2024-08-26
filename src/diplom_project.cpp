@@ -19,7 +19,7 @@ int main()
 	int input_command = -1;
 	string str;
 	vector<string> vec_str;
-
+	vector<string> requests;
 	index.UpdateDocumentBase(converter.GetTextDocuments());
 
 	do
@@ -33,7 +33,9 @@ int main()
 			cout << "*update complete*\n" << endl;
 			break;
 		case 2:
-			converter.putAnswers(searcher.search(converter.GetRequests()));
+
+			requests = converter.GetRequests();
+			converter.putAnswers(searcher.search(requests));
 			cout << "*search complete*\n" << endl;
 			break;
 		case 3:

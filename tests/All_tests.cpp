@@ -18,6 +18,7 @@ void TestInvertedIndexFunctionality (	const vector<string>& docs,
 										const vector<string>& requests,
 										const vector<vector<Entry>>& expected) 
 {
+	cout << "TestInvertedIndexFunctionality run" << endl;
 	vector<vector<Entry>> result;
 	InvertedIndex idx;
 	idx.UpdateDocumentBase(docs);
@@ -100,52 +101,54 @@ TEST(TestCaseInvertedIndex, TestInvertedIndexMissingWord) {
 
 TEST(TestCaseSearchServer, TestSimple) {
 	const vector<string> docs = {
-	"milk milk milk milk water water water",
-	"milk water water",
-	"milk milk milk milk milk water water water water water",
-	"americano cappuccino"
+	"TestSimple_1.txt",//"milk milk milk milk water water water",
+	"TestSimple_2.txt",//"milk water water",
+	"TestSimple_3.txt",//"milk milk milk milk milk water water water water water",
+	"TestSimple_4.txt"//"americano cappuccino"
 	};
-	/*const*/ vector<string> request = {"milk water", "sugar"};
+	const vector<string> request = {"milk water", "sugar"};
 	const vector<vector<RelativeIndex>> expected = {
-	{
-	{2, 1},
-	{0, 0.7},
-	{1, 0.3}
-	},
-	{
-	}
+			{
+				{2, 1},
+				{0, 0.7},
+				{1, 0.3},
+			},
+			{
+			}
 	};
 	InvertedIndex idx;
 	idx.UpdateDocumentBase(docs);
+	cout << "Update completed" << endl;
 	SearchServer srv(idx);
+	cout << "Searh Run" << endl;
 	vector<vector<RelativeIndex>> result = srv.search(request);
 	ASSERT_EQ(result, expected);
 }
 
 TEST(TestCaseSearchServer, TestTop5) {
 	const vector<string> docs = {
-	"london is the capital of great britain",
-	"paris is the capital of france",
-	"berlin is the capital of germany",
-	"rome is the capital of italy",
-	"madrid is the capital of spain",
-	"lisboa is the capital of portugal",
-	"bern is the capital of switzerland",
-	"moscow is the capital of russia",
-	"kiev is the capital of ukraine",
-	"minsk is the capital of belarus",
-	"astana is the capital of kazakhstan",
-	"beijing is the capital of china",
-	"tokyo is the capital of japan",
-	"bangkok is the capital of thailand",
-	"welcome to moscow the capital of russia the third rome",
-	"amsterdam is the capital of netherlands",
-	"helsinki is the capital of finland",
-	"oslo is the capital of norway",
-	"stockholm is the capital of sweden",
-	"riga is the capital of latvia",
-	"tallinn is the capital of estonia",
-	"warsaw is the capital of poland",
+	"TestTop5_1.txt",//"london is the capital of great britain",
+	"TestTop5_2.txt",//"paris is the capital of france",
+	"TestTop5_3.txt",//"berlin is the capital of germany",
+	"TestTop5_4.txt",//"rome is the capital of italy",
+	"TestTop5_5.txt",//"madrid is the capital of spain",
+	"TestTop5_6.txt",//"lisboa is the capital of portugal",
+	"TestTop5_7.txt",//"bern is the capital of switzerland",
+	"TestTop5_8.txt",//"moscow is the capital of russia",
+	"TestTop5_9.txt",//"kiev is the capital of ukraine",
+	"TestTop5_10.txt",//"minsk is the capital of belarus",
+	"TestTop5_11.txt",//"astana is the capital of kazakhstan",
+	"TestTop5_12.txt",//"beijing is the capital of china",
+	"TestTop5_13.txt",//"tokyo is the capital of japan",
+	"TestTop5_14.txt",//"bangkok is the capital of thailand",
+	"TestTop5_15.txt",//"welcome to moscow the capital of russia the third rome",
+	"TestTop5_16.txt",//"amsterdam is the capital of netherlands",
+	"TestTop5_17.txt",//"helsinki is the capital of finland",
+	"TestTop5_18.txt",//"oslo is the capital of norway",
+	"TestTop5_19.txt",//"stockholm is the capital of sweden",
+	"TestTop5_20.txt",//"riga is the capital of latvia",
+	"TestTop5_21.txt",//"tallinn is the capital of estonia",
+	"TestTop5_22.txt"//"warsaw is the capital of poland",
 	};
 	vector<string> request = { "moscow is the capital of russia" };
 	const std::vector<vector<RelativeIndex>> expected = {

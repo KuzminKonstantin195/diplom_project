@@ -30,7 +30,7 @@ public:
 	* @return возвращает отсортированный список релевантных ответов для
 	заданных запросов
 	*/
-	vector<vector<RelativeIndex>> search(vector<string>& queries_input);
+	vector<vector<RelativeIndex>> search(vector<string> queries_input);
 private:
 	InvertedIndex* _index;
 };

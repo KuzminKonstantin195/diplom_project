@@ -7,7 +7,7 @@ using namespace std;
 
 
 vector<vector<RelativeIndex>> SearchServer::search
-( vector<string>& queries_input)
+( vector<string> queries_input)
 {
 	size_t res_size = queries_input.size();
 
@@ -104,6 +104,22 @@ vector<vector<RelativeIndex>> SearchServer::search
 #endif // DEBUG
 			}
 		}
+		// сделаем простейшую пузырьковую сортировку для корректной выдачи ответа
+		int position_counter = 0;
+		for (auto i = 0; i < one_question_result.size(); i++)
+		{
+			for (auto ii = i + 1; ii < one_question_result.size(); ii++)
+			{
+				if (one_question_result.at(i).rank < one_question_result.at(ii).rank)
+				{
+					swap(one_question_result[i], one_question_result[ii]);
+				}
+			}
+		}
+#ifdef DEBUG
+		cout << "one_question_result sorting completed " << endl;
+#endif // DEBUG
+
 		 
 		for (auto& i : one_question_result)
 		{
@@ -122,8 +138,20 @@ vector<vector<RelativeIndex>> SearchServer::search
 #ifdef DEBUG
 	cout << "Searching end" << endl;
 #endif // DEBUG
-
 	
+#ifdef DEBUG
+	cout << "{" << endl;
+	for (auto &i : result)
+	{
+		cout << "{\n\t";
+		for (auto& ii : i)
+		{
+			cout  << "{" << ii.doc_id << ": " << ii.rank << "}, ";
+		}
+		cout << "\n}," << endl;
+	}
+	cout << "}" << endl;
+#endif // DEBUG
 
 	return result;
 	
