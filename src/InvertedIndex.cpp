@@ -95,7 +95,10 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 	{
 		threads_buffer.push_back (make_shared<thread>([&]()
 			{
-				auto doc_num (way_num);
+				int doc_num;
+				mtx.lock();
+				doc_num = (way_num);
+				mtx.unlock();
 
 #ifdef DEBUG
 				mtx.lock();
