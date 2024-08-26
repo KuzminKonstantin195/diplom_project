@@ -123,6 +123,8 @@ vector<vector<RelativeIndex>> SearchServer::search
 	cout << "Searching end" << endl;
 #endif // DEBUG
 
+	
+
 	return result;
 	
 }
