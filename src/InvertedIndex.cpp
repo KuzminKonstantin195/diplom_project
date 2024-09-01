@@ -78,8 +78,8 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 			{
 				mtx.lock();
 				int doc_num = *mid_buffer;
-				delete mid_buffer;
 				mtx.unlock();
+				delete mid_buffer;
 
 				map<string, Entry> local_freq;
 

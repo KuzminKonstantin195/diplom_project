@@ -99,8 +99,8 @@ TEST(TestCaseInvertedIndex, TestInvertedIndexMissingWord) {
 	TestInvertedIndexFunctionality(docs, requests, expected);
 }
 
-
 /*
+
 TEST(TestCaseSearchServer, TestSimple) {
 	const vector<string> docs = {
 	"TestSimple_1.txt",//"milk milk milk milk water water water",
