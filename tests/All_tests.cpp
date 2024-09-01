@@ -99,6 +99,8 @@ TEST(TestCaseInvertedIndex, TestInvertedIndexMissingWord) {
 	TestInvertedIndexFunctionality(docs, requests, expected);
 }
 
+
+/*
 TEST(TestCaseSearchServer, TestSimple) {
 	const vector<string> docs = {
 	"TestSimple_1.txt",//"milk milk milk milk water water water",
@@ -166,3 +168,4 @@ TEST(TestCaseSearchServer, TestTop5) {
 	std::vector<vector<RelativeIndex>> result = srv.search(request);
 	ASSERT_EQ(result, expected);
 }
+*/

@@ -22,6 +22,7 @@ int main()
 	vector<string> requests;
 	index.UpdateDocumentBase(converter.GetTextDocuments());
 
+	/*
 	do
 	{
 		cout << "Enter command: ";
@@ -64,6 +65,7 @@ int main()
 
 		input_command = -1;
 	} while (input_command != 0);
+	*/
 }
 
 void show_menu()

@@ -37,29 +37,6 @@ vector<string> wordSepar(const string& text)
 	return bufVec;
 }
 
-/*
-void word_clean (string word)
-{
-	int counter = 0;
-	for (auto symb =0; symb < word.length(); symb++)
-	{
-		if ((word[symb] >= 97 && word[symb] <= 122) ||  (word[symb] >= 48 && word[symb] <= 57))
-		{
-			
-		}
-		else if (word[symb] >= 65 && word[symb] <= 90)
-		{
-
-		}
-		else
-		{
-			word.erase(word.begin() + symb);
-			symb--;
-		}
-	}
-}
-*/
-
 InvertedIndex::InvertedIndex(InvertedIndex& idx) : docs(idx.docs), freq_dictionary(idx.freq_dictionary) {};
 
 void InvertedIndex::correction_ways (vector<string> &ways)
@@ -80,7 +57,6 @@ void InvertedIndex::correction_ways (vector<string> &ways)
 	
 }
 
-
 void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 {
 #ifdef DEBUG
@@ -93,24 +69,24 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 
 	for (auto way_num = 0; way_num < input_docs.size(); way_num++)
 	{
+		int* mid_buffer = new int;
+		mtx.lock();
+		*mid_buffer = way_num;
+		mtx.unlock();
+
 		threads_buffer.push_back (make_shared<thread>([&]()
 			{
-				int doc_num;
 				mtx.lock();
-				doc_num = (way_num);
+				int doc_num = *mid_buffer;
+				delete mid_buffer;
 				mtx.unlock();
 
-#ifdef DEBUG
-				mtx.lock();
-				//cout << this_thread::get_id() << " started" << endl;
-				mtx.unlock();
-#endif // DEBUG
 				map<string, Entry> local_freq;
 
 				ifstream file;
 #ifdef DEBUG
 				mtx.lock();
-				//cout << "In " << this_thread::get_id() << " doc num : " << doc_num << endl;
+				cout << "In " << this_thread::get_id() << " doc : " << input_docs[doc_num] << endl;
 				mtx.unlock();
 #endif // DEBUG
 				try
@@ -219,7 +195,8 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 		* такая заглушка нужна, чтобы ветка успевала принять для себя номер документа
 		* и не возникало конфликта доступа к одному и тому же файлу
 		*/
-		this_thread::sleep_for(chrono::microseconds(5));					
+		this_thread::sleep_for(chrono::microseconds(5));
+
 	}
 
 	for (auto &i : threads_buffer)
@@ -228,7 +205,10 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 		auto id = i->get_id();
 #endif // DEBUG
 
-		i->join();
+		if (i->joinable())
+		{
+			i->join();
+		}
 
 #ifdef DEBUG
 		mtx.lock();
