@@ -64,171 +64,130 @@ void InvertedIndex::UpdateDocumentBase(vector<string> input_docs)
 #endif // DEBUG
 
 	vector<shared_ptr<thread>> threads_buffer;
-	
+	auto max_thread = std::thread::hardware_concurrency() - 2;
 	mutex mtx;
+	int counter = 0;
 
-	for (auto way_num = 0; way_num < input_docs.size(); way_num++)
-	{
-		int* mid_buffer = new int;
-		mtx.lock();
-		*mid_buffer = way_num;
-		mtx.unlock();
-
-		threads_buffer.push_back (make_shared<thread>([&]()
+	auto creator_thread = make_shared<thread>([&]()
+		{
+			while (counter < input_docs.size())
 			{
-				mtx.lock();
-				int doc_num = *mid_buffer;
-				mtx.unlock();
-				delete mid_buffer;
-
-				map<string, Entry> local_freq;
-
-				ifstream file;
-#ifdef DEBUG
-				mtx.lock();
-				cout << "In " << this_thread::get_id() << " doc : " << input_docs[doc_num] << endl;
-				mtx.unlock();
-#endif // DEBUG
-				try
+				if (threads_buffer.size() < max_thread && threads_buffer.size() < input_docs.size())
 				{
-
-					file.open(input_docs[doc_num]);
-#ifdef DEBUG
-					mtx.lock();
-					//cout << input_docs[doc_num] << " open!" << endl;
-					mtx.unlock();
-#endif // DEBUG
-				}
-				catch (const std::exception&)
-				{
-					cerr << "Error with open " << input_docs[doc_num] << endl;
-				}
-				string word;
-
-				do
-				{
-					file >> word;
-					word = wordSepar(word).at(0);
-
-					auto find_result = local_freq.find(word);
-
-					if (find_result == local_freq.end())
-					{
-						Entry entr;
-						entr.doc_id = doc_num;
-						entr.count = 1;
-
-						local_freq[word] = entr;
-#ifdef DEBUG
-						mtx.lock();
-						cout << "\"" << word << "\"" << " added in local!" << endl;
-						mtx.unlock();
-#endif // DEBUG
-					}
-					else
-					{
-						local_freq[word].count++;
-#ifdef DEBUG
-						mtx.lock();
-						cout << "in local: " << "\"" << word << "\"" << ": " << local_freq[word].doc_id << "-" << local_freq[word].count << endl;
-						mtx.unlock();
-#endif // DEBUG
-					}
-
-				} while (!file.eof());
-
-				for (auto& i : local_freq)
-				{
-#ifdef DEBUG
-					mtx.lock();
-					cout << "now added " << "\"" << i.first << "\"" << endl;
-					mtx.unlock();
-#endif // DEBUG
-
-					mtx.lock();
-
-					auto find_result = freq_dictionary.find(i.first);
-
-					if (find_result == freq_dictionary.end())
-					{
-						freq_dictionary[i.first] = vector<Entry>{ i.second };
-#ifdef DEBUGA
-						//mtx.lock();
-						cout << "Now: " << i.first << ": ";
-						for (auto &en : freq_dictionary[i.first])
+					threads_buffer.push_back(make_shared<thread>([&]()
 						{
-							cout << en.doc_id << "-" << en.count << "; ";
-						}
-						cout << endl;
-						//mtx.unlock();
-#endif // DEBUG
-					}
-					else
-					{
-						for (int pos = 0; pos < freq_dictionary[i.first].size(); pos++)
-						{
-							if (freq_dictionary[i.first][pos].doc_id == i.second.doc_id)
-							{
-								freq_dictionary[i.first][pos].count += i.second.count;
-								break;
-							}
-							else if (freq_dictionary[i.first][pos].doc_id > i.second.doc_id)
-							{
-								freq_dictionary[i.first].insert (freq_dictionary[i.first].begin() + pos, i.second);
-								break;
-							}
-							else if ((pos + 1) == freq_dictionary[i.first].size())
-							{
-								freq_dictionary[i.first].push_back(i.second);
-								break;
-							}
-						}
-					}
-					mtx.unlock();
+							mtx.lock();
+							int doc_num = counter;
+							counter++;
+							mtx.unlock();
 
-					this_thread::sleep_for(chrono::microseconds(2));
+							map<string, Entry> local_freq;
+
+							ifstream file;
+#ifdef DEBUG
+							mtx.lock();
+							cout << "In " << this_thread::get_id() << " doc : " << input_docs[doc_num] << endl;
+							mtx.unlock();
+#endif // DEBUG
+							try
+							{
+
+								file.open(input_docs[doc_num]);
+#ifdef DEBUG
+								mtx.lock();
+								//cout << input_docs[doc_num] << " open!" << endl;
+								mtx.unlock();
+#endif // DEBUG
+							}
+							catch (const std::exception&)
+							{
+								cerr << "Error with open " << input_docs[doc_num] << endl;
+							}
+
+							string word;
+
+							do
+							{
+								file >> word;
+								word = wordSepar(word).at(0);
+
+								auto find_result = local_freq.find(word);
+
+								if (find_result == local_freq.end())
+								{
+									Entry entr;
+									entr.doc_id = doc_num;
+									entr.count = 1;
+
+									local_freq[word] = entr;
+#ifdef DEBUG
+									mtx.lock();
+									cout << "\"" << word << "\"" << " added in local!" << endl;
+									mtx.unlock();
+#endif // DEBUG
+								}
+								else
+								{
+									local_freq[word].count++;
+#ifdef DEBUG
+									mtx.lock();
+									cout << "in local: " << "\"" << word << "\"" << ": " << local_freq[word].doc_id << "-" << local_freq[word].count << endl;
+									mtx.unlock();
+#endif // DEBUG
+								}
+
+							} while (!file.eof());
+							file.close();
+							for (auto& i : local_freq)
+							{
+#ifdef DEBUG
+								mtx.lock();
+								cout << "now added " << "\"" << i.first << "\"" << endl;
+								mtx.unlock();
+#endif // 
+								mtx.lock();
+								auto find_result = freq_dictionary.find(i.first);
+
+								if (find_result == freq_dictionary.end())
+								{
+									freq_dictionary[i.first] = vector<Entry>{ i.second };
+								}
+								else
+								{
+									for (int pos = 0; pos < freq_dictionary[i.first].size(); pos++)
+									{
+										if (freq_dictionary[i.first][pos].doc_id == i.second.doc_id)
+										{
+											freq_dictionary[i.first][pos].count += i.second.count;
+											break;
+										}
+										else if (freq_dictionary[i.first][pos].doc_id > i.second.doc_id)
+										{
+											freq_dictionary[i.first].insert(freq_dictionary[i.first].begin() + pos, i.second);
+											break;
+										}
+										else if ((pos + 1) == freq_dictionary[i.first].size())
+										{
+											freq_dictionary[i.first].push_back(i.second);
+											break;
+										}
+									}
+								}
+								mtx.unlock();
+							}
+
+						}));
 				}
-				file.close();
-			})
-		);
-		/*
-		* такая заглушка нужна, чтобы ветка успевала принять для себя номер документа
-		* и не возникало конфликта доступа к одному и тому же файлу
-		*/
-		this_thread::sleep_for(chrono::microseconds(5));
-
-	}
-
-	for (auto &i : threads_buffer)
-	{
-#ifdef DEBUG
-		auto id = i->get_id();
-#endif // DEBUG
-
-		if (i->joinable())
-		{
-			i->join();
+			}
 		}
+	);
 
-#ifdef DEBUG
-		mtx.lock();
-		cout << id << " joined" << endl;
-		mtx.unlock();
-#endif // DEBUG
-	}
-#ifdef DEBUG
-	cout << "UpdateBase ending" << endl;
-
-	for (auto &i : freq_dictionary)
+	while (counter)
 	{
-		cout << i.first << ": ";
-		for (auto &ii : i.second)
-		{
-			cout << ii.doc_id << " " << ii.count << "; ";
-		}
-		cout << endl;
+
 	}
-#endif // DEBUG
+
+	creator_thread->join();
 }
 
 vector<Entry> InvertedIndex::GetWordCount(const string& word)
